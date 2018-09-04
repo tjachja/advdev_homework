@@ -39,6 +39,6 @@ switch_fractivetend() {
 
 }
 
-switch_backend	"natiactivealparks"	"blue"	"green"
+switch_backend	"nationalparks"	"blue"	"green"
 switch_backend	"mlbparks"	"blue"	"green"
 switch_fractivetend	"parksmap"	"blue"	"green"
