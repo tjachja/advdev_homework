@@ -31,14 +31,14 @@ switch_backend() {
 
 }
 
-switch_fractivetend() {
+switch_frontend() {
 	local app_name=$1
 	local standby=$2
 	local active=$3
-	${ocp} patch route/${app_name} -p '{"spec":{"to":{"name":"${app_name}-${to_active}"}}}'
+	${ocp} patch route/${app_name} -p "{\"spec\":{\"to\":{\"name\":\"${app_name}-${to_active}\"}}}"
 
 }
 
-switch_backend	"nationalparks"	"blue"	"green"
-switch_backend	"mlbparks"	"blue"	"green"
-switch_fractivetend	"parksmap"	"blue"	"green"
+switch_backend	"nationalparks" "blue" "green"
+switch_backend	"mlbparks" "blue" "green"
+switch_frontend	"parksmap" "blue" "green"
