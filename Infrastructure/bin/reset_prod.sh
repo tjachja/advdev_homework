@@ -35,7 +35,8 @@ switch_frontend() {
 	local app_name=$1
 	local standby=$2
 	local active=$3
-	${ocp} patch route/${app_name} -p "{\"spec\":{\"to\":{\"name\":\"${app_name}-${to_active}\"}}}"
+	${ocp} patch route/${app_name} -p "{\"spec\":{\"to\":{\"name\":\"${app_name}-${to_active}\"}}}" || \
+        echo "not patched"
 
 }
 
