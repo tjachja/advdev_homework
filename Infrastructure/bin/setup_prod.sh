@@ -49,12 +49,12 @@ create_parks_backend() {
     
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
 
-    ${ocp} set deployment-hook dc/${app_name} --post curl -s http://${app_name}:8080/ws/data/load/
+    ${ocp} set deployment-hook dc/${app_name} --post -- curl -s http://${app_name}:8080/ws/data/load/
 }
 
 
-oc policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod -n ${GUID}-parks-dev
-oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-prod
+#oc policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod -n ${GUID}-parks-dev
+#oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-prod
 
 # Create mongodb app
 echo "Creating mongodb"
