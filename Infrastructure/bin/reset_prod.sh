@@ -18,7 +18,7 @@ echo "Resetting Parks Production Environment in project ${GUID}-parks-prod to Gr
 # rollout followed by a Green rollout.
 
 # To be Implemented by Student
-ocp="oc -n {GUID}-parks-prod"
+ocp="oc -n ${GUID}-parks-prod"
 
 switch_backend() {
 	local app_name=$1
@@ -35,7 +35,8 @@ switch_fractivetend() {
 	local app_name=$1
 	local standby=$2
 	local active=$3
-	${ocp} patch route/${app} -p '{"spec":{"to":{"name":"green"}}}'
+	${ocp} patch route/${app_name} -p '{"spec":{"to":{"name":"${app_name}-${to_active}"}}}'
+
 }
 
 switch_backend	"natiactivealparks"	"blue"	"green"
