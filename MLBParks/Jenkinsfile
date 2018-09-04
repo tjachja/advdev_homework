@@ -37,7 +37,7 @@ podTemplate(
     // Also copy "../nexus_settings.xml" to your build directory
     // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
     stages {
-        stage("Build-UT-Inspect") {
+        stage("Setup") {
             steps {
                 echo "GUID: ${GUID}"
                 echo "CLUSTER: ${CLUSTER}"

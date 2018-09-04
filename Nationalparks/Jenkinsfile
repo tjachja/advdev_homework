@@ -38,7 +38,7 @@ podTemplate(
     def active = "green"
     def standby = "blue"
     stages {
-        stage("Build-UT-Inspect") {
+        stage("Setup") {
             steps {
                 echo "GUID: ${GUID}"
                 echo "CLUSTER: ${CLUSTER}"

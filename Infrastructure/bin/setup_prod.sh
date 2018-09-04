@@ -56,7 +56,7 @@ create_parks_backend() {
 oc policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod -n ${GUID}-parks-dev
 oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-prod
 
-# Create mongodb zpp
+# Create mongodb app
 echo "Creating mongodb"
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.svc.yml
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb.svc.yml

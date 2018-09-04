@@ -15,7 +15,7 @@ echo "Setting up Parks Development Environment in project ${GUID}-parks-dev"
 ocp="oc -n ${GUID}-parks-dev"
 ${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins
 
-create-app() {
+create_app() {
 	local app-name=$1
 	local s2i-build=$2
 	local type_label=$3
@@ -69,7 +69,7 @@ ${ocp} set deployment-hook dc/nationalparks --post --curl -s http://nationalpark
 echo "setting up parksmap app"
 
 ${ocp} policy add-role-to-user view --serviceaccount=default
-setup_app "parksmap" "redhat-openjdk18-openshift:1.2" "parksmap-frontend"
+create_app "parksmap" "redhat-openjdk18-openshift:1.2" "parksmap-frontend"
 
 ${ocp} create configmap parksmap-config --from-literal=APPNAME="ParksMap (Dev)"
 
