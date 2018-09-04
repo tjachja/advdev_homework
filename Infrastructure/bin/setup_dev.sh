@@ -63,7 +63,7 @@ ${ocp} set env development-hook dc/mlbparks --post --curl -s http://nationalpark
 echo "setting up parks map app"
 
 ${ocp} policy add-role-to-user view --serviceaccount=default
-create_app "mlbparks" "jboss-eap70-openshift:1.7" "parksmap-backend"
+setup_app "parksmap" "redhat-openjdk18-openshift:1.2" "parksmap-frontend"
 
 ${ocp} create configmap parksmap-config --from-literal=APPNAME="Parks Map (Dev)"
 ${ocp} set env dc/parksmap --from=configmap/parksmap-config
