@@ -90,7 +90,7 @@ objects:
         volumes:
         - name: ${NEXUS_SERVICE_NAME}-volume-1
           persistentVolumeClaim:
-            claimName: nexus-pvc
+            claimName: pvc-nexus
     triggers:
     - type: ConfigChange
     - type: ImageChange
