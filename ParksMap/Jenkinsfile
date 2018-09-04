@@ -14,7 +14,6 @@ podTemplate(
 ) {
   node('skopeo-pod') {
 
-
     final SONAR_URL = "http://sonarqube.${GUID}-sonarqube.svc:9000"
     final NEXUS_URL = "http://nexus3.${GUID}-nexus.svc:8081/repository/releases"
 

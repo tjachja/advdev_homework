@@ -46,6 +46,7 @@ ${ocp} new-app ${TEMPLATES_ROOT}/advdev-jenkins-template.yml && \
 
 cat ${TEMPLATES_ROOT}/jenkins-slave-appdev.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
+new_build "parksmap-pipeline" "ParksMap"
 new_build "mlbparks-pipeline" "MLBParks"
 new_build "nationalparks-pipeline" "Nationalparks"
-new_build "parksmap-pipeline" "ParksMap"
+
