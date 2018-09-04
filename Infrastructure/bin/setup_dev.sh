@@ -21,7 +21,7 @@ create_app() {
 	local type_label=$3
 
 	${ocp} new-build --binary=true --name=${app_name} ${s2i_builder_img}
-	${ocp} new-app ${GUID}-parks-dev/${app-name}:0.0-0 --allow-missing-imagestream-tags=true --name=${app_name} -l type=${type_label}
+	${ocp} new-app ${GUID}-parks-dev/${app_name}:0.0-0 --allow-missing-imagestream-tags=true --name=${app_name} -l type=${type_label}
 	${ocp} set triggers dc/${app_name} --remove-all
 	${ocp} expose dc/${app_name} --port 8080
 
