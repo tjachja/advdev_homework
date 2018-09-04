@@ -27,3 +27,25 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 # * CLUSTER: the base url of the cluster used (e.g. na39.openshift.opentlc.com)
 
 # To be Implemented by Student
+ocp="oc -n ${GUID}-jenkins "
+
+TEMPLATES_ROOT=$(dirname $0)/../templates
+
+new_build() {
+    local bc_name=$1
+    local context_dir=$2
+    
+    ${ocp} new-build ${REPO} --name=${bc_name} --strategy=pipeline --context-dir=${context_dir}
+
+    ${ocp} cancel-build bc/${bc_name}
+    ${ocp} set env bc/${bc_name} CLUSTER=${CLUSTER} GUID=${GUID}
+}
+
+${ocp} new-app ${TEMPLATES_ROOT}/advdev-jenkins-template.yml && \
+    ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
+
+cat ${TEMPLATES_ROOT}/jenkins-slave-appdev.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
+
+new_build "mlbparks-pipeline" "MLBParks"
+new_build "nationalparks-pipeline" "Nationalparks"
+new_build "parksmap-pipeline" "ParksMap"
