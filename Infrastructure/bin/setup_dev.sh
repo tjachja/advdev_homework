@@ -16,11 +16,11 @@ ocp="oc -n ${GUID}-parks-dev"
 ${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins
 
 create_app() {
-	local app-name=$1
-	local s2i-build=$2
+	local app_name=$1
+	local s2i_builder_img=$2
 	local type_label=$3
 
-	${ocp} new-build --binary=true --name=${app-name} ${s2i-builder}
+	${ocp} new-build --binary=true --name=${app_name} ${s2i_builder_img}
 	${ocp} new-app ${GUID}-parks-dev/${app-name}:0.0-0 --allow-missing-imagestream-tags=true --name=${app_name} -l type=${type_label}
 	${ocp} set triggers dc/${app_name} --remove-all
 	${ocp} expose dc/${app_name} --port 8080
