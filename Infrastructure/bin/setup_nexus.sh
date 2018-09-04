@@ -29,7 +29,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 # oc new-app -f ../templates/nexus.yaml --param .....
 
 # To be Implemented by Student
-oc new-project xyz-nexus --display-name "Shared Nexus"
+oc new-project ${GUID}-nexus --display-name "Shared Nexus"
 oc new-app sonatype/nexus3:latest
 oc expose svc nexus3
 oc rollout pause dc nexus3
