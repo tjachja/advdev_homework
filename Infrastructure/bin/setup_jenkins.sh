@@ -41,10 +41,10 @@ new_build() {
     ${ocp} set env bc/${bc_name} CLUSTER=${CLUSTER} GUID=${GUID}
 }
 
-${ocp} new-app ${TEMPLATES_ROOT}/advdev-jenkins-template.yml && \
+${ocp} new-app ${TEMPLATES_ROOT}/jenkins.yml && \
     ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
 
-cat ${TEMPLATES_ROOT}/jenkins-slave-appdev.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
+cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
 new_build "parksmap-pipeline" "ParksMap"
 new_build "mlbparks-pipeline" "MLBParks"

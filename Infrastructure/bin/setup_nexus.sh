@@ -31,7 +31,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 # To be Implemented by Student
 oc new-project ${GUID}-nexus --display-name "Shared Nexus"
 oc new-app sonatype/nexus3:latest
-oc expose svc nexus3
+oc expose svc/nexus3
 oc rollout pause dc nexus3
 oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}'
 oc set resources dc nexus3 --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=500m
