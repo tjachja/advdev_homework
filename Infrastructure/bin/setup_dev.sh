@@ -51,7 +51,7 @@ ${ocp} create configmap mlbparks-config --from-literal=APPNAME="MLB Parks (Dev)"
 ${ocp} set env dc/mlbparks --from=configmap/parksdb-config
 ${ocp} set env dc/mlbparks --from=configmap/mlbparks-config
 
-${ocp} set deployment-hook dc/mlbparks --post --curl -s http://mlbparks:8080/ws/data/load
+${ocp} set deployment-hook dc/mlbparks --post curl -s http://mlbparks:8080/ws/data/load
 
 # creating nationalparks
 echo "setting up national parks app"
@@ -63,7 +63,7 @@ ${ocp} create configmap nationalparks-config --from-literal=APPNAME="National Pa
 ${ocp} set env dc/nationalparks --from=configmap/parksdb-config
 ${ocp} set env dc/nationalparks --from=configmap/nationalparks-config
 
-${ocp} set deployment-hook dc/nationalparks --post --curl -s http://nationalparks:8080/ws/data/load
+${ocp} set deployment-hook dc/nationalparks --post curl -s http://nationalparks:8080/ws/data/load
 
 # creating parksmap
 echo "setting up parksmap app"

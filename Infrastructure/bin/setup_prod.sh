@@ -49,7 +49,7 @@ create_parks_backend() {
     
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
 
-    ${ocp} set deployment-hook dc/${app_name} --post --curl -s http://${app_name}:8080/ws/data/load/
+    ${ocp} set deployment-hook dc/${app_name} --post curl -s http://${app_name}:8080/ws/data/load/
 }
 
 
