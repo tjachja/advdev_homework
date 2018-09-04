@@ -44,7 +44,7 @@ ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-lit
 # creating mlbparks
 echo "setting up mlb parks app"
 
-setup_app "mlbparks" "jboss-eap70-openshift:1.7" "parksmap-backend"
+create_app "mlbparks" "jboss-eap70-openshift:1.7" "parksmap-backend"
 ${ocp} create configmap mlbparks-config --from-literal=APPNAME="MLB Parks (Dev)"
 ${ocp} set env dc/mlbparks --from=configmap/parksdb-config
 ${ocp} set env dc/mlbparks --from=configmap/mlbparks-config
@@ -53,7 +53,7 @@ ${ocp} set env development-hook dc/mlbparks --post --curl -s http://mlbparks:808
 # creating nationalparks
 echo "setting up national parks app"
 
-setup_app "nationalparks" "redhat-openjdk18-openshift:1.2" "parksmap-backend"
+create_app "nationalparks" "redhat-openjdk18-openshift:1.2" "parksmap-backend"
 ${ocp} create configmap nationalparks-config --from-literal=APPNAME="National Parks (Dev)"
 ${ocp} set env dc/mlbparks --from=configmap/parksdb-config
 ${ocp} set env dc/mlbparks --from=configmap/nationalparks-config
@@ -63,7 +63,7 @@ ${ocp} set env development-hook dc/mlbparks --post --curl -s http://nationalpark
 echo "setting up parks map app"
 
 ${ocp} policy add-role-to-user view --serviceaccount=default
-setup_app "mlbparks" "jboss-eap70-openshift:1.7" "parksmap-backend"
+create_app "mlbparks" "jboss-eap70-openshift:1.7" "parksmap-backend"
 
 ${ocp} create configmap parksmap-config --from-literal=APPNAME="Parks Map (Dev)"
 ${ocp} set env dc/parksmap --from=configmap/parksmap-config
