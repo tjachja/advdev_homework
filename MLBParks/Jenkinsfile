@@ -1,43 +1,38 @@
 // Jenkinsfile for MLBParks
-podTemplate(
-  label: "skopeo-pod",
-  cloud: "openshift",
-  inheritFrom: "maven",
-  containers: [
-    containerTemplate(
-      name: "jnlp",
-      image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-appdev",
-      resourceRequestMemory: "1Gi",
-      resourceLimitMemory: "2Gi"
-    )
-  ]
-) {
-  node('skopeo-pod') {
-    echo "GUID: ${GUID}"
-    echo "CLUSTER: ${CLUSTER}"
-    final SONAR_URL = "http://sonarqube.${GUID}-sonarqube.svc:9000"
-    final NEXUS_URL = "http://nexus3.${GUID}-nexus.svc:8081/repository/releases"
 
-    final mvnCmd = "/opt/rh/rh-maven33/root/usr/bin/mvn -q -s nexus_settings.xml "
+final SONAR_URL = "http://sonarqube.${GUID}-sonarqube.svc:9000"
+final NEXUS_URL = "http://nexus3.${GUID}-nexus.svc:8081/repository/releases"
 
-    final APP_HOME = "MLBParks"
-    final APP_NAME = APP_HOME.toLowerCase()
-    final ARTIFACT_FILENAME = "${APP_NAME}.war"
-    final TYPE = "parksmap-backend"
+final mvnCmd = "/opt/rh/rh-maven33/root/usr/bin/mvn -q -s nexus_settings.xml "
 
-    def version = "0.0"
-    def devTag = "0.0-0"
-    def prodTag = "0.0"
+final APP_HOME = "MLBParks"
+final APP_NAME = APP_HOME.toLowerCase()
+final ARTIFACT_FILENAME = "${APP_NAME}.war"
+final TYPE = "parksmap-backend"
 
-    def active = "green"
-    def standby = "blue"
+def version = "0.0"
+def devTag = "0.0-0"
+def prodTag = "0.0"
 
-    // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
-    // You need to build the application in directory `MLBParks`.
-    // Also copy "../nexus_settings.xml" to your build directory
-    // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
+def active = "green"
+def standby = "blue"
+
+pipeline {
+    agent {
+        kubernetes {
+            label 'skopeo-pod'
+            cloud 'openshift'
+            inheritFrom 'maven'
+            containerTemplate {
+                name 'jnlp'
+                image "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-appdev"
+                resourceRequestMemory '1Gi'
+                resourceLimitMemory '2Gi'
+            }
+        }
+    }
     stages {
-        stage("Setup") {
+        stage("Build-UT-Inspect") {
             steps {
                 echo "GUID: ${GUID}"
                 echo "CLUSTER: ${CLUSTER}"
@@ -136,9 +131,8 @@ podTemplate(
             }
         }
     }
-
-  }
 }
+
 
 // Convenience Functions to read variables from the pom.xml
 // Do not change anything below this line.

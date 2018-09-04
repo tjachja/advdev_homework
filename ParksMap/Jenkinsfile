@@ -1,48 +1,37 @@
 // Jenkinsfile for ParksMap
-podTemplate(
-  label: "skopeo-pod",
-  cloud: "openshift",
-  inheritFrom: "maven",
-  containers: [
-    containerTemplate(
-      name: "jnlp",
-      image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-appdev",
-      resourceRequestMemory: "1Gi",
-      resourceLimitMemory: "2Gi"
-    )
-  ]
-) {
-  node('skopeo-pod') {
+final SONAR_URL = "http://sonarqube.${GUID}-sonarqube.svc:9000"
+final NEXUS_URL = "http://nexus3.${GUID}-nexus.svc:8081/repository/releases"
 
-    final SONAR_URL = "http://sonarqube.${GUID}-sonarqube.svc:9000"
-    final NEXUS_URL = "http://nexus3.${GUID}-nexus.svc:8081/repository/releases"
+final mvnCmd = "/opt/rh/rh-maven33/root/usr/bin/mvn -q -s nexus_settings.xml "
 
-    final mvnCmd = "/opt/rh/rh-maven33/root/usr/bin/mvn -q -s nexus_settings.xml "
+final APP_HOME = "ParksMap"
+final APP_NAME = APP_HOME.toLowerCase()
+final ARTIFACT_FILENAME = "${APP_NAME}.jar"
+final TYPE = "parksmap-frontend"
 
-    final APP_HOME = "ParksMap"
-    final APP_NAME = APP_HOME.toLowerCase()
-    final ARTIFACT_FILENAME = "${APP_NAME}.jar"
-    final TYPE = "parksmap-frontend"
+def version = "0.0"
+def devTag = "0.0-0"
+def prodTag = "0.0"
 
-    def version = "0.0"
-    // Set the tag for the development image: version + build number
-    def devTag  = "0.0-0"
-    // Set the tag for the production image: version
-    def prodTag = "0.0"
+def active = "green"
+def standby = "blue"
 
-    def active = "green"
-    def standby = "blue"
-
-    echo "GUID: ${GUID}"
-    echo "CLUSTER: ${CLUSTER}"
-
-    // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
-    // You need to build the application in directory `ParksMap`.
-    // Also copy "../nexus_settings.xml" to your build directory
-    // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
-
+pipeline {
+    agent {
+        kubernetes {
+            label 'skopeo-pod'
+            cloud 'openshift'
+            inheritFrom 'maven'
+            containerTemplate {
+                name 'jnlp'
+                image "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-appdev"
+                resourceRequestMemory '1Gi'
+                resourceLimitMemory '2Gi'
+            }
+        }
+    }
     stages {
-        stage("Setup") {
+        stage("Build-UT-Inspect") {
             steps {
                 echo "GUID: ${GUID}"
                 echo "CLUSTER: ${CLUSTER}"
@@ -141,13 +130,6 @@ podTemplate(
             }
         }
     }
-
-
-
-
-
-
-  }
 }
 
 // Convenience Functions to read variables from the pom.xml
