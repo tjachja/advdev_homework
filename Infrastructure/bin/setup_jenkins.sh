@@ -31,22 +31,28 @@ ocp="oc -n ${GUID}-jenkins "
 
 TEMPLATES_ROOT=$(dirname $0)/../templates
 
-new_build() {
-    local bc_name=$1
-    local context_dir=$2
-    
-    ${ocp} new-build ${REPO} --name=${bc_name} --strategy=pipeline --context-dir=${context_dir}
+echo "Granting permissions"
+oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-jenkins
+oc policy add-role-to-user edit system:serviceaccount:gpte-jenkins:jenkins -n $GUID-jenkins
 
-    ${ocp} cancel-build bc/${bc_name}
-    ${ocp} set env bc/${bc_name} CLUSTER=${CLUSTER} GUID=${GUID}
-}
-
-${ocp} new-app ${TEMPLATES_ROOT}/jenkins.yml && \
-    ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
+${ocp} new-app ${TEMPLATES_ROOT}/jenkins.yml
+${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
 
 cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
-new_build "parksmap-pipeline" "ParksMap"
-new_build "mlbparks-pipeline" "MLBParks"
-new_build "nationalparks-pipeline" "Nationalparks"
 
+oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml
+oc create -f ./Infrastructure/templates/bc-mlbparks.yaml -n ${GUID}-jenkins
+oc cancel-build bc/mlbparks-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
+oc set env bc/mlbparks-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
+oc start-build bc/mlbparks-pipeline -n ${GUID}-jenkins
+
+oc create -f ${TEMPLATES_ROOT}/nationalparks-pipeline.yaml
+oc cancel-build bc/nationalparks-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
+oc set env bc/nationalparks-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
+oc start-build bc/nationalparks-pipeline -n ${GUID}-jenkins
+
+oc create -f ${TEMPLATES_ROOT}/parksmap-pipeline.yaml
+oc cancel-build bc/parksmap-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
+oc set env buildconfigs/parksmap-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
+oc start-build bc/parksmap-pipeline -n ${GUID}-jenkins

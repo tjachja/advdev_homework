@@ -80,7 +80,3 @@ create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0"
 create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
 
 ${ocp} expose svc/parksmap-green --name parksmap
-
-oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml
-oc create -f ${TEMPLATES_ROOT}/nationalparks-pipeline.yaml
-oc create -f ${TEMPLATES_ROOT}/parksmap-pipeline.yaml

@@ -1,24 +1,30 @@
 apiVersion: v1
-items:
-- kind: "BuildConfig"
-  apiVersion: "v1"
-  metadata:
-    name: "parksmap-pipeline"
-  spec:
-    source:
-      type: "Git"
-      git:
-        uri: "https://github.com/tjachja/advdev_homework"
-        ref: "master"
-      contextDir: "ParksMap/"
-    strategy:
-      type: "JenkinsPipeline"
-      jenkinsPipelineStrategy:
-        env:
-        - name: GUID
-          value: ${GUID}
-        - name: CLUSTER
-          value: ${CLUSTER}
-        jenkinsfilePath: Jenkinsfile
-kind: List
-metadata: []
+kind: BuildConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewBuild
+  creationTimestamp: null
+  labels:
+    build: parksmap-pipeline  
+  name: parksmap-pipeline
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: parksmap:latest
+  postCommit: {}
+  resources: {}
+  source:
+    git:
+      uri: https://github.com/tjachja/advdev_homework.git
+    type: Git
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: ParksMap/Jenkinsfile
+  triggers:
+  - type: ConfigChange
+  - imageChange: {}
+    type: ImageChange
+status:
+  lastVersion: 0
