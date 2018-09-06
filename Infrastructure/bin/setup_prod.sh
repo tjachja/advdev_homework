@@ -13,7 +13,7 @@ echo "Setting up Parks Production Environment in project ${GUID}-parks-prod"
 # The Green services/routes need to be active initially to guarantee a successful grading pipeline run.
 
 # To be Implemented by Student
-ocp="oc -n ${GUID}-parks-prod "
+ocp="oc -n ${GUID}-parks-prod"
 
 create_app() {
     local app_name=$1
@@ -53,7 +53,7 @@ create_parks_backend() {
 # Create mongodb app
 echo "Creating mongodb"
 
-oc new-app -f ./Infrastructure/templates/mongo.yaml -n ${GUID}-parks-prod --env=REPLICAS=3 
+oc new-app -f ../templates/mongo.yaml -n ${GUID}-parks-prod --env=REPLICAS=3 
 
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
