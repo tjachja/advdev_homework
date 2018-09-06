@@ -1,0 +1,27 @@
+ines (26 sloc)  638 Bytes
+apiVersion: v1
+items:
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: "mlbparks-pipeline"
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "https://github.com/tjachja/advdev_homework"
+        ref: "master"
+      contextDir: "MLBParks/"
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: ${GUID}
+        - name: CLUSTER
+          value: ${CLUSTER}
+        jenkinsfilePath: Jenkinsfile
+    postCommit: #call /ws/data/load/ endpoint to load data
+      script: "wget 127.0.0.1/ws/data/load/ > /dev/null"
+kind: List
+metadata: []

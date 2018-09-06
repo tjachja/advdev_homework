@@ -52,10 +52,6 @@ create_parks_backend() {
     ${ocp} set deployment-hook dc/${app_name} --post -- curl -s http://${app_name}:8080/ws/data/load/
 }
 
-
-#oc policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod -n ${GUID}-parks-dev
-#oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-prod
-
 # Create mongodb app
 echo "Creating mongodb"
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.svc.yml
@@ -75,8 +71,8 @@ ${ocp} create configmap parksdb-config \
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
 
-create_parks_backend "nationalparks-blue"   "National Parks (Blue)"   "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend-standby"
-create_parks_backend "nationalparks-green"  "National Parks (Green)"  "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend"
+create_parks_backend "nationalparks-blue" "National Parks (Blue)" "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend-standby"
+create_parks_backend "nationalparks-green" "National Parks (Green)" "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend"
 
 oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-prod
 
@@ -84,3 +80,7 @@ create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0"
 create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
 
 ${ocp} expose svc/parksmap-green --name parksmap
+
+oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml
+oc create -f ${TEMPLATES_ROOT}/nationalparks-pipeline.yaml
+oc create -f ${TEMPLATES_ROOT}/parksmap-pipeline.yaml
