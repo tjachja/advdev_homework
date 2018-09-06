@@ -15,8 +15,6 @@ echo "Setting up Parks Production Environment in project ${GUID}-parks-prod"
 # To be Implemented by Student
 ocp="oc -n ${GUID}-parks-prod "
 
-TEMPLATES_ROOT=$(dirname $0)/../templates
-
 create_app() {
     local app_name=$1
     local app_display_name=$2
@@ -54,19 +52,8 @@ create_parks_backend() {
 
 # Create mongodb app
 echo "Creating mongodb"
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.svc.yml
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb.svc.yml
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb.statefulset.yml
 
-${ocp} rollout status dc/mongodb -w
-
-${ocp} create configmap parksdb-config \
-   --from-literal=DB_HOST=mongodb \
-   --from-literal=DB_PORT=27017 \
-   --from-literal=DB_USERNAME=mongodb \
-   --from-literal=DB_PASSWORD=mongodb \
-   --from-literal=DB_NAME=parks \
-   --from-literal=DB_REPLICASET=rs0
+oc new-app -f ./Infrastructure/templates/mongo.yaml -n ${GUID}-parks-prod --env=REPLICAS=3 
 
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
