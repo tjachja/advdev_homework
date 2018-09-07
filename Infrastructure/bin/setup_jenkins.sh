@@ -32,7 +32,8 @@ ocp="oc -n ${GUID}-jenkins "
 TEMPLATES_ROOT=$(dirname $0)/../templates
 
 # Code to set up the Jenkins project to execute the
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi
+
+${ocp} new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true
 
 LIN_NUM=$(($(sed -n '/\[registries.insecure\]/=' /etc/containers/registries.conf) + 1))
 sed -i "${LIN_NUM}d" /etc/containers/registries.conf
