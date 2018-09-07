@@ -52,6 +52,63 @@ USER 1001" > Dockerfile
 
 sudo docker build . -t docker-registry-default.apps.na39.example.opentlc.com/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
 
-
 skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
-${ocp} create -f ${TEMPLATES_ROOT}/pipeline.yaml
+
+echo "apiVersion: v1
+items:
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: "mlbparks-pipeline"
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "https://github.com/tjachja/advdev_homework.git"
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: 9e5c
+        - name: CLUSTER
+          value: na39.openshift.opentlc.com
+        jenkinsfilePath: MLBParks/Jenkinsfile
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: "nationalparks-pipeline"
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "https://github.com/tjachja/advdev_homework.git"
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: 9e5c
+        - name: CLUSTER
+          value: na39.openshift.opentlc.com
+        jenkinsfilePath: Nationalparks/Jenkinsfile
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: "parksmap-pipeline"
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "https://github.com/tjachja/advdev_homework.git"
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: 9e5c
+        - name: CLUSTER
+          value: na39.openshift.opentlc.com
+        jenkinsfilePath: ParksMap/Jenkinsfile
+kind: List
+metadata: []" | ${ocp} create -f -
