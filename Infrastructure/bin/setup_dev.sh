@@ -74,5 +74,8 @@ create_app "parksmap" "redhat-openjdk18-openshift:1.2" "parksmap-frontend"
 ${ocp} create configmap parksmap-config --from-literal=APPNAME="ParksMap (Dev)"
 
 ${ocp} set env dc/parksmap --from=configmap/parksmap-config
-${ocp} expose svc/parksmap
+${ocp} expose svc mlbparks -l type=parksmap-backend
+${ocp} expose svc nationalparks  -l type=parksmap-backend
+${ocp} expose svc parksmap  -l type=parksmap-backend
+
 

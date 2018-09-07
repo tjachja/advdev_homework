@@ -14,6 +14,8 @@ echo "Setting up Parks Production Environment in project ${GUID}-parks-prod"
 
 # To be Implemented by Student
 ocp="oc -n ${GUID}-parks-prod"
+${ocp} policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod 
+${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins 
 
 create_app() {
     local app_name=$1
@@ -32,7 +34,9 @@ create_app() {
     ${ocp} set probe dc/${app_name} --liveness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
 
     ${ocp} create configmap ${app_name}-config --from-literal=APPNAME="${app_display_name}"
+
     ${ocp} set env dc/${app_name} --from=configmap/${app_name}-config
+
 }
 
 create_parks_backend() {
@@ -68,4 +72,6 @@ oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-prod
 create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend-standby"
 create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
 
-${ocp} expose svc/parksmap-green --name parksmap
+${ocp} expose svc/mlbparks-blue --name mlbparks 
+${ocp} expose svc/nationalparks-blue --name nationalparks
+${ocp} expose svc/parksmap-blue --name parksmap 
