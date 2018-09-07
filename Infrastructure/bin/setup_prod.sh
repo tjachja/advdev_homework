@@ -44,6 +44,7 @@ create_parks_backend() {
     echo "creating ${app_display_name} backend app"
 
     create_app ${app_name} "${app_display_name}" ${image} ${type_label}
+    ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
     
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
 

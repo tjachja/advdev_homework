@@ -41,17 +41,17 @@ ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name 
 cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
 
-oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml -n ${GUID}-jenkins
+${ocp} create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml -n ${GUID}-jenkins
 oc cancel-build bc/mlbparks-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
 oc set env bc/mlbparks-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
 oc start-build bc/mlbparks-pipeline -n ${GUID}-jenkins
 
-oc create -f ${TEMPLATES_ROOT}/nationalparks-pipeline.yaml
+${ocp} create -f ${TEMPLATES_ROOT}/nationalparks-pipeline.yaml
 oc cancel-build bc/nationalparks-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
 oc set env bc/nationalparks-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
 oc start-build bc/nationalparks-pipeline -n ${GUID}-jenkins
 
-oc create -f ${TEMPLATES_ROOT}/parksmap-pipeline.yaml
+${ocp} create -f ${TEMPLATES_ROOT}/parksmap-pipeline.yaml
 oc cancel-build bc/parksmap-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
 oc set env buildconfigs/parksmap-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
 oc start-build bc/parksmap-pipeline -n ${GUID}-jenkins
