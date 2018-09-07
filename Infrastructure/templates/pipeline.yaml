@@ -55,4 +55,4 @@ items:
           value: na39.openshift.opentlc.com
         jenkinsfilePath: ParksMap/Jenkinsfile
 kind: List
-metadata: []" | oc create -f - -n 70fa-jenkins
+metadata: []"

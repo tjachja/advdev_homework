@@ -17,6 +17,9 @@ ocp="oc -n ${GUID}-parks-prod"
 ${ocp} policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod 
 ${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins 
 
+${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
+    
+
 create_app() {
     local app_name=$1
     local app_display_name=$2
@@ -48,7 +51,6 @@ create_parks_backend() {
     echo "creating ${app_display_name} backend app"
 
     create_app ${app_name} "${app_display_name}" ${image} ${type_label}
-    ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
     
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
 
@@ -58,9 +60,9 @@ create_parks_backend() {
 # Create mongodb app
 echo "Creating mongodb"
 
-${ocp} crate -f ../templates/mongodb-internal.yml
-${ocp} crate -f ../templates/mongodb-ss.yml
-${ocp} crate -f ../templates/mongodb-svc.yml
+${ocp} create -f ../templates/mongodb-internal.yml
+${ocp} create -f ../templates/mongodb-ss.yml
+${ocp} create -f ../templates/mongodb-svc.yml
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
 

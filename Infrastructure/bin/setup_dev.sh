@@ -28,9 +28,7 @@ create_app() {
 	# health check
 	${ocp} set probe dc/${app_name} --liveness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
 	${ocp} set probe dc/${app_name} --readiness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
-
 }
-
 
 # creating mongodb
 echo "setting up mongodb"
