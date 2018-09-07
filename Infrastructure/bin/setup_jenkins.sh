@@ -41,8 +41,7 @@ ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name 
 cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
 
-oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml
-oc create -f ./Infrastructure/templates/bc-mlbparks.yaml -n ${GUID}-jenkins
+oc create -f ${TEMPLATES_ROOT}/mlbparks-pipeline.yaml -n ${GUID}-jenkins
 oc cancel-build bc/mlbparks-pipeline -n ${GUID}-jenkins || echo "build not cancelled"
 oc set env bc/mlbparks-pipeline GUID="$GUID" CLUSTER="$CLUSTER" -n ${GUID}-jenkins
 oc start-build bc/mlbparks-pipeline -n ${GUID}-jenkins

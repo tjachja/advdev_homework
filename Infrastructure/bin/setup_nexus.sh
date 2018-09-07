@@ -31,8 +31,8 @@ echo "Setting up Nexus in project $GUID-nexus"
 # To be Implemented by Student
 
 TEMPLATES_ROOT=$(dirname $0)/../templates
-oc new-app ${TEMPLATES_ROOT}/nexus.yml -n ${GUID}-nexus && \
-    oc rollout status dc/$(oc get dc -o jsonpath='{ .items[0].metadata.name }' -n ${GUID}-nexus) -w -n ${GUID}-nexus
+oc new-app ${TEMPLATES_ROOT}/nexus.yml -n ${GUID}-nexus 
+oc rollout status dc/$(oc get dc -o jsonpath='{ .items[0].metadata.name }' -n ${GUID}-nexus) -w -n ${GUID}-nexus
 
 # oc new-project ${GUID}-nexus --display-name "Shared Nexus"
 # oc new-app sonatype/nexus3:latest -n ${GUID}-nexus
