@@ -36,6 +36,30 @@ TEMPLATES_ROOT=$(dirname $0)/../templates
 ${ocp} new-app ${TEMPLATES_ROOT}/jenkins.yml && \
     ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
 
+
+LIN_NUM=$(($(sed -n '/\[registries.insecure\]/=' /etc/containers/registries.conf) + 1))
+sed -i "${LIN_NUM}d" /etc/containers/registries.conf
+sed "${LIN_NUM}i registries = \['docker-registry-default.apps.na39.openshift.opentlc.com'\]" /etc/containers/registries.conf
+
+sudo systemctl enable docker
+sudo systemctl start docker
+
+mkdir -p $HOME/jenkins-slave-appdev
+cd  $HOME/jenkins-slave-appdev
+
+echo "FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9
+USER root
+RUN yum -y install skopeo apb && \
+    yum clean all
+USER 1001" > Dockerfile
+
+sudo docker build . -t docker-registry-default.apps.na39.example.opentlc.com/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
+
+
+skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9  
+
+
+
 cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
 
 echo "apiVersion: v1
