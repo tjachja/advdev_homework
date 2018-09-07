@@ -54,8 +54,9 @@ create_parks_backend() {
 # Create mongodb app
 echo "Creating mongodb"
 
-oc new-app -f ../templates/mongo.yaml -n ${GUID}-parks-prod --env=REPLICAS=3 
-
+${ocp} crate -f ../templates/mongodb-internal.yml
+${ocp} crate -f ../templates/mongodb-ss.yml
+${ocp} crate -f ../templates/mongodb-svc.yml
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
 
