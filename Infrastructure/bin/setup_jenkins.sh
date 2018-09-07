@@ -31,10 +31,6 @@ ocp="oc -n ${GUID}-jenkins "
 
 TEMPLATES_ROOT=$(dirname $0)/../templates
 
-echo "Granting permissions"
-${ocp} policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins
-${ocp} policy add-role-to-user edit system:serviceaccount:gpte-jenkins:jenkins 
-
 ${ocp} new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi
 
 cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 

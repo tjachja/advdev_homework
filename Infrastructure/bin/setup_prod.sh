@@ -19,7 +19,6 @@ ${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkin
 
 ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
 
-
 create_app() {
     local app_name=$1
     local app_display_name=$2
@@ -53,7 +52,6 @@ create_parks_backend() {
     create_app ${app_name} "${app_display_name}" ${image} ${type_label}
     
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
-
     ${ocp} set deployment-hook dc/${app_name} --post -- curl -s http://${app_name}:8080/ws/data/load/
 }
 
@@ -63,6 +61,8 @@ TEMPLATES_ROOT=$(dirname $0)/../templates
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.yml
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-ss.yml
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-svc.yml
+
+# Create apps
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
 
@@ -74,6 +74,7 @@ oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-prod
 create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend-standby"
 create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
 
+# Expose Services 
 ${ocp} expose svc/mlbparks-blue --name mlbparks 
 ${ocp} expose svc/nationalparks-blue --name nationalparks
 ${ocp} expose svc/parksmap-blue --name parksmap 
