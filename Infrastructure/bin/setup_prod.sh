@@ -18,7 +18,7 @@ ${ocp} policy add-role-to-group system:image-puller system:serviceaccounts:${GUI
 ${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins 
 
 ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
-    
+
 
 create_app() {
     local app_name=$1
@@ -59,10 +59,10 @@ create_parks_backend() {
 
 # Create mongodb app
 echo "Creating mongodb"
-
-${ocp} create -f ../templates/mongodb-internal.yml
-${ocp} create -f ../templates/mongodb-ss.yml
-${ocp} create -f ../templates/mongodb-svc.yml
+TEMPLATES_ROOT=$(dirname $0)/../templates
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.yml
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-ss.yml
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-svc.yml
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
 create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
 
