@@ -17,7 +17,7 @@ items:
           value: 9e5c
         - name: CLUSTER
           value: na39.openshift.opentlc.com
-        jenkinsfilePath: MLBParks/Jenkinsfile
+        jenkinsfilePath: MLBParks/jenkinsfile
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
@@ -35,7 +35,7 @@ items:
           value: 9e5c
         - name: CLUSTER
           value: na39.openshift.opentlc.com
-        jenkinsfilePath: Nationalparks/Jenkinsfile
+        jenkinsfilePath: Nationalparks/jenkinsfile
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
@@ -53,6 +53,6 @@ items:
           value: 9e5c
         - name: CLUSTER
           value: na39.openshift.opentlc.com
-        jenkinsfilePath: ParksMap/Jenkinsfile
+        jenkinsfilePath: ParksMap/jenkinsfile
 kind: List
 metadata: []
