@@ -31,7 +31,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 # To be Implemented by Student
 
 TEMPLATES_ROOT=$(dirname $0)/../templates
-oc new-app -f ../templates/nexus.yaml -n ${GUID}-nexus 
+oc new-app -f ${TEMPLATES_ROOT}/nexus.yaml -n ${GUID}-nexus 
 
 while : ; do
     echo "Checking if Nexus is Ready..."
