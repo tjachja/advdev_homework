@@ -44,7 +44,7 @@ podTemplate(
       def prodNamespace = "${GUID}-parks-prod"
 
 
-      stage('Build jar') {
+      stage('Build war') {
         echo "Building version ${devTag}"
         sh "${mvnCmd} clean package -DskipTests"
       }
@@ -76,7 +76,7 @@ podTemplate(
         // Start Binary Build in OpenShift using the file we just published
 
         
-        sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.jar -n ${devNamespace}"
+        sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n ${devNamespace}"
 
         // Tag the image using the devTag
         openshiftTag alias: 'false', destStream: 'mlbparks', destTag: devTag, destinationNamespace: devNamespace, namespace: devNamespace, srcStream: 'mlbparks', srcTag: 'latest', verbose: 'false'
