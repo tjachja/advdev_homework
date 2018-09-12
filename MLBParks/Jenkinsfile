@@ -74,10 +74,9 @@ podTemplate(
         echo "Building OpenShift container image mlbparks:${devTag}"
 
         // Start Binary Build in OpenShift using the file we just published
-        // The filename is openshift-tasks.war in the 'target' directory of your current
-        // Jenkins workspace
+
         
-        sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n ${devNamespace}"
+        sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.jar -n ${devNamespace}"
 
         // Tag the image using the devTag
         openshiftTag alias: 'false', destStream: 'mlbparks', destTag: devTag, destinationNamespace: devNamespace, namespace: devNamespace, srcStream: 'mlbparks', srcTag: 'latest', verbose: 'false'

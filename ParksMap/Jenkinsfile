@@ -114,7 +114,6 @@ podTemplate(
         sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/parksmap:${devTag} docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/parksmap:${devTag}"
 
         // Tag the built image with the production tag.
-        // Replace xyz-tasks-dev with the name of your dev project
         openshiftTag alias: 'false', destStream: 'parksmap', destTag: prodTag, destinationNamespace: prodNamespace, namespace: devNamespace, srcStream: 'parksmap', srcTag: devTag, verbose: 'false'
       }
 
