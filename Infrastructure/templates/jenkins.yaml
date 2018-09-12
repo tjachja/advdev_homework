@@ -5,8 +5,7 @@ labels:
   template: advdev-jenkins-template
 metadata:
   annotations:
-    description: |-
-      Jenkins template based on existing jenkins-persistent template.
+    description: Jenkins template based on existing jenkins-persistent template.
     iconClass: icon-jenkins
     tags: instant-app,jenkins
   name: advdev-jenkins

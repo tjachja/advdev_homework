@@ -33,34 +33,27 @@ TEMPLATES_ROOT=$(dirname $0)/../templates
 
 # Code to set up the Jenkins project to execute the
 
-${ocp} new-app ${TEMPLATES_ROOT}/jenkins.yml && \
-    ${ocp} rollout status dc/$(${ocp} get dc -o jsonpath='{ .items[0].metadata.name }') -w 
+# Go to Jenkins project
+oc project ${GUID}-jenkins
+# Add roles to jenkins user in ${GUID}-jenkins
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-jenkins
+oc policy add-role-to-user admin system:serviceaccount:gpte-jenkins:jenkins -n ${GUID}-jenkins
+# Create the Jenkins app
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
+oc set resources dc/jenkins --limits=cpu=1 --requests=memory=2Gi,cpu=1 -n ${GUID}-jenkins
+# Create custom Jenkins Slave pod
+cat ${TEMPLATES_ROOT}/Dockerfile | oc new-build --name=jenkins-slave-appdev --dockerfile=- -n ${GUID}-jenkins
 
+oc set probe dc/jenkins -n $GUID-jenkins --liveness --failure-threshold 8 --initial-delay-seconds 600 -- echo ok
+oc set probe dc/jenkins -n $GUID-jenkins --readiness --failure-threshold 8 --initial-delay-seconds 360 --get-url=http://:8080/login
 
-LIN_NUM=$(($(sed -n '/\[registries.insecure\]/=' /etc/containers/registries.conf) + 1))
-sed -i "${LIN_NUM}d" /etc/containers/registries.conf
-sed "${LIN_NUM}i registries = \['docker-registry-default.apps.na39.openshift.opentlc.com'\]" /etc/containers/registries.conf
-
-sudo systemctl enable docker
-sudo systemctl start docker
-
-mkdir -p $HOME/jenkins-slave-appdev
-cd  $HOME/jenkins-slave-appdev
-
-echo "FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9
-USER root
-RUN yum -y install skopeo apb && \
-    yum clean all
-USER 1001" > Dockerfile
-
-sudo docker build . -t docker-registry-default.apps.na39.example.opentlc.com/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
-
-
-skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9  
-
-
-
-cat ${TEMPLATES_ROOT}/slavepod.Dockerfile | ${ocp} new-build --name=jenkins-slave-appdev -D - 
+while : ; do
+    echo "Checking if Jenkins is Ready..."
+    oc get pod -n ${GUID}-jenkins | grep jenkins | grep -v build | grep -v deploy |grep "1/1.*Running"
+    [[ "$?" == "1" ]] || break
+    echo "...no. Sleeping 10 seconds."
+    sleep 10
+done
 
 echo "apiVersion: v1
 items:

@@ -58,9 +58,9 @@ create_parks_backend() {
 # Create mongodb app
 echo "Creating mongodb"
 TEMPLATES_ROOT=$(dirname $0)/../templates
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.yml
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb-ss.yml
-${ocp} create -f ${TEMPLATES_ROOT}/mongodb-svc.yml
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-internal.yaml
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-ss.yaml
+${ocp} create -f ${TEMPLATES_ROOT}/mongodb-svc.yaml
 
 # Create apps
 create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
