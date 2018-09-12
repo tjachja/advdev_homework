@@ -19,7 +19,7 @@ podTemplate(
     // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
     // You need to build the application in directory `ParksMap`.
     // Also copy "../nexus_settings.xml" to your build directory
-    // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
+
     def mvnCmd = "mvn -s ./nexus_settings.xml"
 
     // Checkout Source Code
@@ -92,7 +92,7 @@ podTemplate(
         sh "oc set image dc/parksmap parksmap=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap:${devTag} -n ${GUID}-parks-dev"
 
         // Deploy the development application.
-        // Replace xyz-tasks-dev with the name of your production project
+
         openshiftDeploy depCfg: 'parksmap', namespace: devNamespace, verbose: 'false', waitTime: '', waitUnit: 'sec'
         openshiftVerifyDeployment depCfg: 'parksmap', namespace: devNamespace, replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
         openshiftVerifyService namespace: devNamespace, svcName: 'parksmap', verbose: 'false'
@@ -128,6 +128,7 @@ podTemplate(
         // Replace xyz-tasks-dev and xyz-tasks-prod with
         // your project names
         activeApp = sh(returnStdout: true, script: "oc get route parksmap -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+
         if (activeApp == "parksmap-green") {
           destApp = "parksmap-blue"
         }
@@ -145,17 +146,10 @@ podTemplate(
       }
 
       stage('Switch over to new Version') {
-        // Don't ask now
-        // input "Switch Production?"
-
         echo "Switching Production application to ${destApp}."
-        // Replace xyz-tasks-prod with the name of your production project
         sh 'oc patch route parksmap -n ' + prodNamespace + ' -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
       }
-
     }
-
- 
   }
 }
 
