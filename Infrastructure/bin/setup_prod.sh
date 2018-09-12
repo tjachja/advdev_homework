@@ -14,8 +14,12 @@ echo "Setting up Parks Production Environment in project ${GUID}-parks-prod"
 
 # To be Implemented by Student
 ocp="oc -n ${GUID}-parks-prod"
-${ocp} policy add-role-to-group system:image-puller system:serviceaccounts:${GUID}-parks-prod 
-${ocp} policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins 
+
+echo "Grant permissions"
+oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-prod
+oc policy add-role-to-user system:image-puller system:serviceaccounts:${GUID}-parks-prod -n ${GUID}-parks-dev
+oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-prod
+oc policy add-role-to-user admin system:serviceaccount:gpte-jenkins:jenkins -n ${GUID}-parks-prod
 
 ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
 
@@ -75,6 +79,6 @@ create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0"
 create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
 
 # Expose Services 
-${ocp} expose svc/mlbparks-blue --name mlbparks 
-${ocp} expose svc/nationalparks-blue --name nationalparks
-${ocp} expose svc/parksmap-blue --name parksmap 
+${ocp} expose svc/mlbparks-green --name mlbparks 
+${ocp} expose svc/nationalparks-green --name nationalparks
+${ocp} expose svc/parksmap-green --name parksmap 

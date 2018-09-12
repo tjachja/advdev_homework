@@ -43,3 +43,7 @@ done
 echo "configure now"
 chmod +x ./Infrastructure/bin/nexus_configuration.sh
 ./Infrastructure/bin/nexus_configuration.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}' -n ${GUID}-nexus )
+oc expose dc nexus3 --port=5000 --name=nexus-registry
+oc create route edge nexus-registry --service=nexus-registry --port=5000
+oc annotate route nexus3 console.alpha.openshift.io/overview-app-route=true
+oc annotate route nexus-registry console.alpha.openshift.io/overview-app-route=false
