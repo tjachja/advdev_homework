@@ -66,6 +66,6 @@ create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0"
 ${ocp} expose svc/mlbparks-green --name mlbparks 
 ${ocp} expose svc/nationalparks-green --name nationalparks
 ${ocp} expose svc/parksmap-green --name parksmap 
-
+# Create Deployment hooks
 ${ocp} set deployment-hook dc/mlbparks-green --post -- curl -s http://mlbparks:8080/ws/data/load/ 
 ${ocp} set deployment-hook dc/nationalparks-green --post -- curl -s http://mlbparks:8080/ws/data/load/ 

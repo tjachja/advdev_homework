@@ -43,10 +43,11 @@ oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi
 oc set resources dc/jenkins --limits=cpu=1 --requests=memory=2Gi,cpu=1 -n ${GUID}-jenkins
 # Create custom Jenkins Slave pod
 cat ${TEMPLATES_ROOT}/Dockerfile | oc new-build --name=jenkins-slave-appdev --dockerfile=- -n ${GUID}-jenkins
-
+# Health check
 oc set probe dc/jenkins -n $GUID-jenkins --liveness --failure-threshold 8 --initial-delay-seconds 600 -- echo ok
 oc set probe dc/jenkins -n $GUID-jenkins --readiness --failure-threshold 8 --initial-delay-seconds 360 --get-url=http://:8080/login
 
+# Wait till Jenkins is Ready
 while : ; do
     echo "Checking if Jenkins is Ready..."
     oc get pod -n ${GUID}-jenkins | grep jenkins | grep -v build | grep -v deploy |grep "1/1.*Running"
@@ -55,6 +56,7 @@ while : ; do
     sleep 10
 done
 
+# Create Pipelines
 echo "apiVersion: v1
 items:
 - kind: "BuildConfig"

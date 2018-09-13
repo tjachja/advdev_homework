@@ -31,7 +31,26 @@ echo "Setting up Nexus in project $GUID-nexus"
 # To be Implemented by Student
 
 TEMPLATES_ROOT=$(dirname $0)/../templates
-oc new-app -f ${TEMPLATES_ROOT}/nexus.yaml -n ${GUID}-nexus 
+oc new-app sonatype/nexus3:latest -n ${GUID}-nexus 
+oc expose svc nexus3 -n ${GUID}-nexus 
+oc rollout pause dc nexus3 -n ${GUID}-nexus 
+oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}' -n ${GUID}-nexus 
+oc set resources dc nexus3 --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=500m -n ${GUID}-nexus 
+echo "apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi" | oc create -f -
+
+oc set volume dc/nexus3 --add --overwrite --name=nexus3-volume-1 --mount-path=/nexus-data/ --type persistentVolumeClaim --claim-name=nexus-pvc -n ${GUID}-nexus 
+oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok -n ${GUID}-nexus 
+oc set probe dc/nexus3 --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/ -n ${GUID}-nexus 
+oc rollout resume dc nexus3 -n ${GUID}-nexus 
 
 while : ; do
     echo "Checking if Nexus is Ready..."
@@ -41,11 +60,11 @@ while : ; do
 	sleep 10
 done
 
-echo "configure now"
+echo "Configure Nexus"
 chmod +x ./Infrastructure/bin/nexus_configuration.sh
 ./Infrastructure/bin/nexus_configuration.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}' -n ${GUID}-nexus )
 
-oc expose dc nexus3 --port=5000 --name=nexus-registry
-oc create route edge nexus-registry --service=nexus-registry --port=5000
-oc annotate route nexus3 console.alpha.openshift.io/overview-app-route=true
-oc annotate route nexus-registry console.alpha.openshift.io/overview-app-route=false
+oc expose dc nexus3 --port=5000 --name=nexus-registry -n ${GUID}-nexus 
+oc create route edge nexus-registry --service=nexus-registry --port=5000 -n ${GUID}-nexus 
+oc annotate route nexus3 console.alpha.openshift.io/overview-app-route=true -n ${GUID}-nexus 
+oc annotate route nexus-registry console.alpha.openshift.io/overview-app-route=false -n ${GUID}-nexus 
