@@ -32,31 +32,17 @@ create_app() {
     ${ocp} new-app ${image} --allow-missing-images=true --allow-missing-imagestream-tags=true --name=${app_name} -l type=${type_label}
 
     ${ocp} set triggers dc/${app_name} --remove-all
+    ${ocp} patch dc/${app_name} -p '{"spec": {"strategy": {"type": "Recreate"}}}'
     ${ocp} rollout cancel dc/${app_name}
 
     ${ocp} expose dc/${app_name} --port 8080
 
-    ${ocp} set probe dc/${app_name} --readiness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
-    ${ocp} set probe dc/${app_name} --liveness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
-
     ${ocp} create configmap ${app_name}-config --from-literal=APPNAME="${app_display_name}"
-
     ${ocp} set env dc/${app_name} --from=configmap/${app_name}-config
-
-}
-
-create_parks_backend() {
-    local app_name=$1
-    local app_display_name=$2
-    local image=$3
-    local type_label=$4
-    
-    echo "creating ${app_display_name} backend app"
-
-    create_app ${app_name} "${app_display_name}" ${image} ${type_label}
-    
     ${ocp} set env dc/${app_name} --from=configmap/parksdb-config
-    ${ocp} set deployment-hook dc/${app_name} --post -- curl -s http://${app_name}:8080/ws/data/load/
+
+    ${ocp} set probe dc/mlbparks-green --liveness --failure-threshold=4 -initial-delay-seconds=35 -- echo ok
+    ${ocp} set probe dc/mlbparks-green --readiness --failure-threshold=4 --initial-delay-seconds=60 --get-url="http://:8080/ws/healthz/"
 }
 
 # Create mongodb app
@@ -67,18 +53,19 @@ ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-ss.yaml
 ${ocp} create -f ${TEMPLATES_ROOT}/mongodb-svc.yaml
 
 # Create apps
-create_parks_backend "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend-standby"
-create_parks_backend "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "parksmap-backend"
+create_app "mlbparks-blue"  "MLB Parks (Blue)"  "${GUID}-parks-dev/mlbparks:0.0" "mlbparks-blue"
+create_app "mlbparks-green" "MLB Parks (Green)" "${GUID}-parks-dev/mlbparks:0.0" "mlbparks-green"
 
-create_parks_backend "nationalparks-blue" "National Parks (Blue)" "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend-standby"
-create_parks_backend "nationalparks-green" "National Parks (Green)" "${GUID}-parks-dev/nationalparks:0.0" "parksmap-backend"
+create_app "nationalparks-blue" "National Parks (Blue)" "${GUID}-parks-dev/nationalparks:0.0" "nationalparks-blue"
+create_app "nationalparks-green" "National Parks (Green)" "${GUID}-parks-dev/nationalparks:0.0" "nationalparks-green"
 
-oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-prod
-
-create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend-standby"
-create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-frontend"
+create_app "parksmap-blue"  "ParksMap (Blue)"   "${GUID}-parks-dev/parksmap:0.0" "parksmap-blue"
+create_app "parksmap-green" "ParksMap (Green)"  "${GUID}-parks-dev/parksmap:0.0" "parksmap-green"
 
 # Expose Services 
 ${ocp} expose svc/mlbparks-green --name mlbparks 
 ${ocp} expose svc/nationalparks-green --name nationalparks
 ${ocp} expose svc/parksmap-green --name parksmap 
+
+${ocp} set deployment-hook dc/mlbparks-green --post -- curl -s http://mlbparks:8080/ws/data/load/ 
+${ocp} set deployment-hook dc/nationalparks-green --post -- curl -s http://mlbparks:8080/ws/data/load/ 

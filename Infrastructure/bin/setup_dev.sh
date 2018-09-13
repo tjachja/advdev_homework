@@ -18,28 +18,13 @@ echo "Set Permissions"
 oc policy add-role-to-user edit system:serviceaccount:${GUID}-jenkins:jenkins -n ${GUID}-parks-dev
 oc policy add-role-to-user view --serviceaccount=default -n ${GUID}-parks-dev
 oc policy add-role-to-user admin system:serviceaccount:gpte-jenkins:jenkins -n ${GUID}-parks-dev
-create_app() {
-	local app_name=$1
-	local s2i_builder_img=$2
-	local type_label=$3
-
-	${ocp} new-build --binary=true --name=${app_name} ${s2i_builder_img}
-	${ocp} new-app ${GUID}-parks-dev/${app_name}:0.0-0 --allow-missing-imagestream-tags=true --name=${app_name} -l type=${type_label}
-	${ocp} set triggers dc/${app_name} --remove-all
-	${ocp} expose dc/${app_name} --port 8080
-
-	# health check
-	${ocp} set probe dc/${app_name} --liveness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
-	${ocp} set probe dc/${app_name} --readiness --initial-delay-seconds 30 --failure-threshold 3 --get-url=http://:8080/ws/healthz/
-}
 
 # creating mongodb
 echo "setting up mongodb"
 ${ocp} new-app mongodb-persistent --name=mongodb --param=MONGODB_USER=mongodb --param=MONGODB_PASSWORD=mongodb --param=MONGODB_DATABASE=parks
-
 ${ocp} rollout status dc/mongodb -w
-
 ${ocp} create configmap parksdb-config --from-literal=DB_HOST=mongodb --from-literal=DB_PORT=27017 --from-literal=DB_USERNAME=mongodb --from-literal=DB_PASSWORD=mongodb --from-literal=DB_NAME=parks
+
 echo "Create MLBParks"
 # Build Config
 oc new-build --binary=true --allow-missing-images=true --image-stream=jboss-eap70-openshift:1.7 --name mlbparks -l app=mlbparks -n ${GUID}-parks-dev
@@ -57,8 +42,8 @@ oc expose dc mlbparks --port 8080 -n ${GUID}-parks-dev
 # Expose the svc
 oc expose svc mlbparks --labels="type=parksmap-backend" -n ${GUID}-parks-dev
 # Set readiness and liveness probes
-oc set probe dc/mlbparks --liveness --failure-threshold=4 -n ${GUID}-parks-dev --initial-delay-seconds=35 -- echo ok
-oc set probe dc/mlbparks --readiness --get-url=http://:8080/ws/healthz/ --failure-threshold=4 --initial-delay-seconds=60 -n ${GUID}-parks-dev
+oc set probe dc/mlbparks --liveness --failure-threshold 3 -n ${GUID}-parks-dev --initial-delay-seconds 35 -- echo ok
+oc set probe dc/mlbparks --readiness --get-url=http://:8080/ws/healthz/ --failure-threshold 3 --initial-delay-seconds 60 -n ${GUID}-parks-dev
 oc set deployment-hook dc/mlbparks -n ${GUID}-parks-dev --post -- curl -s http://mlbparks:8080/ws/data/load/ 
 
 echo "Create Nationalparks"
